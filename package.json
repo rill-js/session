@@ -1,0 +1,27 @@
+{
+  "name": "@rill/session",
+  "version": "0.5.1",
+  "description": "In memory sessions for Rill.",
+  "author": "Dylan Piercey <pierceydylan@gmail.com>",
+  "main": "server/index.js",
+  "browser": "browser/index.js",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rill-js/session"
+  },
+  "keywords": [
+    "session",
+    "storage",
+    "rill"
+  ],
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-mocha": "^2.1.3",
+    "rill": "rill-js/rill",
+    "supertest": "^1.1.0"
+  },
+  "dependencies": {
+    "get-uid": "^1.0.1"
+  }
+}
