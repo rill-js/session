@@ -1,6 +1,6 @@
 {
   "name": "@rill/session",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "In memory sessions for Rill.",
   "author": "Dylan Piercey <pierceydylan@gmail.com>",
   "main": "server/index.js",
@@ -13,13 +13,19 @@
   "keywords": [
     "session",
     "storage",
+    "isomorphic",
+    "universal",
     "rill"
   ],
   "devDependencies": {
+    "@rill/cookies": "^0.5.1",
     "gulp": "^3.9.0",
     "gulp-mocha": "^2.1.3",
     "rill": "rill-js/rill",
     "supertest": "^1.1.0"
+  },
+  "peerDependencies": {
+    "@rill/cookies": "0.x"
   },
   "dependencies": {
     "get-uid": "^1.0.1"

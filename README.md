@@ -13,10 +13,16 @@ npm install @rill/session
 ```javascript
 const rill = require("rill");
 const app  = rill();
+const cookies = require("@rill/cookies");
 const session = require("@rill/session");
+
+// Cookies are needed for sessions.
+app.use(cookies());
 
 // Creates a session that will expire every second. (Default of 1 day)
 app.use(require("@rill/session")({ ttl: 1000 }));
+
+// Use the session.
 app.use(function (req, res, next) {
 	// Session will be persisted to the server after the request is over.
 	this.session; //-> {};
