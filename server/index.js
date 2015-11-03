@@ -46,7 +46,7 @@ module.exports = function (options) {
 				break;
 		}
 
-		ctx.session = cache[token];
+		req.session = cache[token];
 
 		return next().then(function () {
 			var opts = { path: ctx.app.base.pathname || "/" };
@@ -59,7 +59,7 @@ module.exports = function (options) {
 				res.cookie(KEY, token, opts);
 			}
 			
-			cache[token] = ctx.session;
+			cache[token] = req.session;
 		});
 	};
 };

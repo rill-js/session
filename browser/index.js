@@ -22,7 +22,7 @@ module.exports = function  (options) {
 		baseURL   = ctx.app.base.pathname || "/";
 
 		return loadSession().then(function (session) {
-			ctx.session = session;
+			req.session = session;
 
 			if (options.refresh && options.ttl) {
 				res.cookie(KEY, token, {
@@ -31,7 +31,7 @@ module.exports = function  (options) {
 				});
 			}
 
-			return next().then(saveSession.bind(ctx));
+			return next().then(saveSession.bind(req));
 		});
 	};
 };
