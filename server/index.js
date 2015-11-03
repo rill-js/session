@@ -24,7 +24,7 @@ module.exports = function (options) {
 	return function sessionMiddleware (req, res, next) {
 		var ctx      = this;
 		var newToken = false;
-		var token    = ctx.cookies.get(KEY);
+		var token    = req.cookies[KEY];
 		var action   = req.headers[KEY];
 
 		if (!token || !cache[token]) {
@@ -56,7 +56,7 @@ module.exports = function (options) {
 					opts.expires = new Date(+new Date + options.ttl);
 				}
 
-				ctx.cookies.set(KEY, token, opts);
+				res.cookie(KEY, token, opts);
 			}
 			
 			cache[token] = ctx.session;

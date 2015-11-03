@@ -18,14 +18,14 @@ module.exports = function  (options) {
 
 	return function sessionMiddleware (req, res, next) {
 		var ctx   = this;
-		var token = ctx.cookies.get(KEY);
+		var token = req.cookies[KEY];
 		baseURL   = ctx.app.base.pathname || "/";
 
 		return loadSession().then(function (session) {
 			ctx.session = session;
 
 			if (options.refresh && options.ttl) {
-				ctx.cookies.set(KEY, token, {
+				res.cookie(KEY, token, {
 					path: baseURL,
 					expires: new Date(+new Date + options.ttl)
 				});
