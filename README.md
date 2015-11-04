@@ -18,9 +18,9 @@ const session = require("@rill/session");
 app.use(require("@rill/session")({ ttl: 1000 }));
 
 // Use the session.
-app.use(function (req, res, next) {
+app.use(function (ctx, next) {
 	// Session will be persisted to the server after the request is over.
-	req.session; //-> {};
+	ctx.req.session; //-> {};
 });
 ```
 

@@ -21,8 +21,9 @@ module.exports = function (options) {
 	if (null == options.ttl) options.ttl = 8.64e7;
 	if (null == options.refresh) options.refresh = true;
 
-	return function sessionMiddleware (req, res, next) {
-		var ctx      = this;
+	return function sessionMiddleware (ctx, next) {
+		var req      = ctx.req;
+		var res      = ctx.res;
 		var newToken = false;
 		var token    = req.cookies[KEY];
 		var action   = req.headers[KEY];
