@@ -26,7 +26,7 @@ module.exports = function (options) {
 		var res      = ctx.res;
 		var newToken = false;
 		var token    = req.cookies[KEY];
-		var action   = req.headers[KEY];
+		var action   = req.get(KEY);
 
 		if (!token || !cache[token]) {
 			newToken     = true;
@@ -36,14 +36,14 @@ module.exports = function (options) {
 
 		switch (action) {
 			case "load":
-				next              = noop;
-				res.status        = 200;
-				res.headers[DATA] = JSON.stringify(cache[token]);
+				next       = noop;
+				res.status = 200;
+				res.set(DATA, JSON.stringify(cache[token]));
 				break;
 			case "save":
 				next         = noop;
 				res.status   = 200;
-				cache[token] = JSON.parse(req.headers[DATA]);
+				cache[token] = JSON.parse(req.get(DATA));
 				break;
 		}
 

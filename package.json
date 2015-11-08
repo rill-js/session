@@ -1,6 +1,6 @@
 {
   "name": "@rill/session",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "In memory sessions for Rill.",
   "author": "Dylan Piercey <pierceydylan@gmail.com>",
   "main": "server/index.js",
@@ -18,7 +18,7 @@
     "rill"
   ],
   "devDependencies": {
-    "@rill/cookies": "^0.5.1",
+    "@rill/cookies": "^0.6.1",
     "gulp": "^3.9.0",
     "gulp-mocha": "^2.1.3",
     "rill": "rill-js/rill",
