@@ -23,7 +23,8 @@ module.exports = function  (options) {
 		baseURL   = ctx.app.base.pathname || "/";
 
 		return loadSession().then(function (session) {
-			req.session = session;
+			req.session   = session;
+			req.sessionId = token;
 
 			if (options.refresh && options.ttl) {
 				res.cookie(KEY, token, {

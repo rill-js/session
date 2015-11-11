@@ -21,6 +21,7 @@ app.use(require("@rill/session")({ ttl: 1000 }));
 app.use(function (ctx, next) {
 	// Session will be persisted to the server after the request is over.
 	ctx.req.session; //-> {};
+	ctx.req.sessionId; //-> Unique identifier for this session.
 });
 ```
 

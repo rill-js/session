@@ -47,7 +47,8 @@ module.exports = function (options) {
 				break;
 		}
 
-		req.session = cache[token];
+		req.sessionId = token;
+		req.session   = cache[token];
 
 		return next().then(function () {
 			var opts = { path: ctx.app.base.pathname || "/" };
