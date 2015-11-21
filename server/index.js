@@ -17,7 +17,7 @@ module.exports = function (options) {
 	return function sessionMiddleware (ctx, next) {
 		var req       = ctx.req;
 		var res       = ctx.res;
-		var token     = req.cookies[DATA] || req.get(ID);
+		var token     = req.cookies[ID] || req.get(ID);
 		var updated   = req.get(DATA);
 		var lastSaved = req.get(SAVED);
 		var session   = cache[token];
@@ -38,7 +38,7 @@ module.exports = function (options) {
 
 		return next().then(function () {
 			// Set cookie on new sessions.
-			if (String(session.id) !== token) res.cookie(DATA, session.id, { path: baseURL });
+			if (String(session.id) !== token) res.cookie(ID, session.id, { path: baseURL });
 
 			if (typeof res.body === "string") {
 				// Append state to html to avoid an extra round trip in the browser.
