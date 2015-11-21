@@ -1,73 +1,51 @@
-var CONF    = require("../conf");
-var KEY     = CONF.KEY;
-var DATA    = CONF.DATA;
-var baseURL = null;
+var Receptacle  = require("receptacle");
+var interceptor = require("side-step");
+var NAMESPACE   = "__rill_session";
+var ID          = NAMESPACE + "_id";
+var DATA        = NAMESPACE + "_data";
+var SAVED       = NAMESPACE + "_last_saved";
+var session     = new Receptacle(window[DATA]);
+var lastSaved   = session.lastModified;
+var baseURL     = null;
+var curReq      = null;
 
 /**
  * Adds a session to a rill app and persists it between browser and server.
  *
- * @param {Object} options - options for the session.
- * @param {Number} options.ttl - the max age for the session in ms.
- * @param {Boolean} options.refresh - If the session should automatically reset it's timer when accessed.
  * @return {Function}
  */
-module.exports = function  (options) {
-	if (null == options) options = {};
-	if (null == options.ttl) options.ttl = 8.64e7;
-	if (null == options.refresh) options.refresh = true;
-
+module.exports = function (options) {
 	return function sessionMiddleware (ctx, next) {
-		var req   = ctx.req;
-		var res   = ctx.res;
-		var token = req.cookies[KEY];
-		baseURL   = ctx.app.base.pathname || "/";
-
-		return loadSession().then(function (session) {
-			req.session   = session;
-			req.sessionId = token;
-
-			if (options.refresh && options.ttl) {
-				res.cookie(KEY, token, {
-					path: baseURL,
-					expires: new Date(+new Date + options.ttl)
-				});
-			}
-
-			return next().then(saveSession.bind(req));
-		});
+		baseURL        = ctx.app.base.pathname || "/";
+		curReq         = ctx.req;
+		curReq.session = session;
+		return next();
 	};
 };
 
-function loadSession () {
-	return new Promise(function (accept, reject) {
+// Sync session with server on any request if the session has been modified.
+interceptor.on("request", function (headers) {
+	if (session.lastModified > lastSaved) {
+		lastSaved     = new Date;
+		headers[DATA] = JSON.stringify(session);
+	}
+	headers[SAVED] = String(lastSaved.valueOf());
+	headers[ID]    = session.id;
+});
+
+// Sync local session if a response says that the session has been modified.
+interceptor.on("response", function (headers) {
+	var data = headers.get(DATA);
+	if (!data) return;
+	curReq.session = session = new Receptacle(JSON.parse(data));
+	lastSaved      = session.lastModified;
+});
+
+// Sync session with server before the page closes.
+addEventListener("beforeunload", function () {
+	if (session.lastModified > lastSaved) {
 		var xhr = new XMLHttpRequest;
-		xhr.onreadystatechange = function () {
-			if (xhr.readyState !== 4) return;
-			if (xhr.status !== 200) return reject(new Error("Could not load session."));
-			accept(JSON.parse(xhr.getResponseHeader(DATA)));
-		};
-		xhr.onerror = reject;
-		xhr.open("HEAD", baseURL, true);
-		xhr.setRequestHeader(KEY, "load");
+		xhr.open("HEAD", baseURL, false);
 		xhr.send();
-	});
-}
-
-function saveSession () {
-	var session = this.session;
-
-	return new Promise(function (accept, reject) {
-		var xhr = new XMLHttpRequest;
-		xhr.onreadystatechange = function () {
-			if (xhr.readyState !== 4) return;
-			if (xhr.status !== 200) return reject(new Error("Could not save session."));
-			accept();
-		};
-		xhr.onerror = reject;
-		xhr.open("HEAD", baseURL, true);
-		xhr.setRequestHeader(KEY, "save");
-		xhr.setRequestHeader(DATA, JSON.stringify(session));
-		xhr.send();
-	});
-}
-
+	}
+});

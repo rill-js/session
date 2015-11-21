@@ -1,6 +1,6 @@
 {
   "name": "@rill/session",
-  "version": "0.8.1",
+  "version": "1.0.0",
   "description": "In memory sessions for Rill.",
   "author": "Dylan Piercey <pierceydylan@gmail.com>",
   "main": "server/index.js",
@@ -14,6 +14,10 @@
     "session",
     "storage",
     "isomorphic",
+    "receptacle",
+    "cache",
+    "lru",
+    "ttl",
     "universal",
     "rill"
   ],
@@ -25,6 +29,7 @@
     "supertest": "^1.1.0"
   },
   "dependencies": {
-    "get-uid": "^1.0.1"
+    "receptacle": "^0.1.2",
+    "side-step": "^0.1.1"
   }
 }

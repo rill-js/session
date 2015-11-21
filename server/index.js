@@ -1,9 +1,9 @@
-var CONF  = require("../conf");
-var KEY   = CONF.KEY;
-var DATA  = CONF.DATA;
-
-// Utils
-var getUID = require("get-uid");
+var Receptacle = require("receptacle");
+var NAMESPACE  = "__rill_session";
+var ID         = NAMESPACE + "_id";
+var DATA       = NAMESPACE + "_data";
+var SAVED      = NAMESPACE + "_last_saved";
+var head       = /(<head[^>]*>)(.*?)<\/head>/;
 
 // In memory storage for all sessions.
 var cache = {};
@@ -11,59 +11,45 @@ var cache = {};
 /**
  * Adds a session to a rill app and persists it between browser and server.
  *
- * @param {Object} options - options for the session.
- * @param {Number} options.ttl - the max age for the session in ms.
- * @param {Boolean} options.refresh - If the session should automatically reset it's timer when accessed.
  * @return {Function}
  */
 module.exports = function (options) {
-	if (null == options) options = {};
-	if (null == options.ttl) options.ttl = 8.64e7;
-	if (null == options.refresh) options.refresh = true;
-
 	return function sessionMiddleware (ctx, next) {
-		var req      = ctx.req;
-		var res      = ctx.res;
-		var newToken = false;
-		var token    = req.cookies[KEY];
-		var action   = req.get(KEY);
+		var req       = ctx.req;
+		var res       = ctx.res;
+		var token     = req.cookies[DATA] || req.get(ID);
+		var updated   = req.get(DATA);
+		var lastSaved = req.get(SAVED);
+		var session   = cache[token];
+		var baseURL   = ctx.app.base.pathname || "/";
 
-		if (!token || !cache[token]) {
-			newToken     = true;
-			token        = String(getUID())
-			cache[token] = {};
+		if (updated) {
+			// Session save from client.
+			session = new Receptacle(JSON.parse(updated));
+		} else if (!token || !session) {
+			// Client needs a session.
+			session = new Receptacle;
+		} else {
+			// Load existing session.
+			session = cache[token];
 		}
 
-		switch (action) {
-			case "load":
-				next       = noop;
-				res.status = 200;
-				res.set(DATA, JSON.stringify(cache[token]));
-				break;
-			case "save":
-				next         = noop;
-				res.status   = 200;
-				cache[token] = JSON.parse(req.get(DATA));
-				break;
-		}
-
-		req.sessionId = token;
-		req.session   = cache[token];
+		cache[session.id] = req.session = session;
 
 		return next().then(function () {
-			var opts = { path: ctx.app.base.pathname || "/" };
+			// Set cookie on new sessions.
+			if (String(session.id) !== token) res.cookie(DATA, session.id, { path: baseURL });
 
-			if (newToken || options.refresh) {
-				if (options.ttl) {
-					opts.expires = new Date(+new Date + options.ttl);
-				}
-
-				res.cookie(KEY, token, opts);
+			if (typeof res.body === "string") {
+				// Append state to html to avoid an extra round trip in the browser.
+				res.body = res.body.replace(head, function (m, head, content) {
+					return head + "<script>window." + DATA + " = " + JSON.stringify(session) + ";</script>" + "</head>";
+				});
+			} else if (Number(lastSaved) < session.lastModified) {
+				// If the session has been updated via ajax then we will send the updated session.
+				res.set(DATA, JSON.stringify(session));
 			}
-			
-			cache[token] = req.session;
+
 		});
 	};
 };
-
-function noop () { return Promise.resolve() }

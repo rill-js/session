@@ -1,6 +1,8 @@
 # Rill Session
 Isomorphic session middleware that will provided consistent sessions from client to server.
 
+Sessions are instances of [Receptacle](https://github.com/DylanPiercey/receptacle), check out the docs for modifying the session.
+
 # Installation
 
 #### Npm
@@ -14,23 +16,26 @@ npm install @rill/session
 const app     = require("rill")();
 const session = require("@rill/session");
 
-// Creates a session that will expire every second. (Default of 1 day)
-app.use(require("@rill/session")({ ttl: 1000 }));
+app.use(require("@rill/session")({ max: 100 }));
 
 // Use the session.
-app.use(function (ctx, next) {
-	// Session will be persisted to the server after the request is over.
-	ctx.req.session; //-> {};
-	ctx.req.sessionId; //-> Unique identifier for this session.
+app.use(function ({ req }, next) {
+	// Sessions are instances of a "Receptacle" cache.
+	req.session.set("a", 1, { ttl: 1000 });
+	req.session.get("a"); // 1
 });
 ```
 
-# Options
+# Implementation Details
+Rill session uses some tricks to ensure that a session is always up to date on both the browser.
 
-**ttl [8.64e+7]** - How long (in miliseconds) should the session stay alive.
+1) It will automatically inject the current session as a (hidden) global variable when html is served to the client.
 
-**refresh [true]** - If true the session will automatically increment the expiry when accessed.
+2) It will listen for ajax calls and attempt to patch the session using existing calls. This allows for xhr requests (or fetch) whilst ensuring that any session changes are in both places.
 
+3) When the browser is about to quit it will send a message to the server with the final state for the session.
+
+4) All of the above steps are skipped if a session is not marked as modified.
 
 ### Contributions
 
