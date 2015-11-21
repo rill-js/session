@@ -37,6 +37,8 @@ Rill session uses some tricks to ensure that a session is always up to date on b
 
 * All of the above steps are skipped if a session is not marked as modified.
 
+---
+
 ### Contributions
 
 * Use gulp to run tests.
