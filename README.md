@@ -1,6 +1,5 @@
 # Rill Session
 Isomorphic session middleware that will provided consistent sessions from client to server.
-
 Sessions are instances of [Receptacle](https://github.com/DylanPiercey/receptacle), check out the docs for modifying the session.
 
 # Installation
