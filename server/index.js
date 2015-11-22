@@ -13,7 +13,10 @@ var cache = {};
  *
  * @return {Function}
  */
-module.exports = function (options) {
+module.exports = function (opts) {
+	opts      = opts || {};
+	opts.path = "path" in opts ? opts.path : "/";
+
 	return function sessionMiddleware (ctx, next) {
 		var req       = ctx.req;
 		var res       = ctx.res;
@@ -21,7 +24,6 @@ module.exports = function (options) {
 		var updated   = req.get(DATA);
 		var lastSaved = req.get(SAVED);
 		var session   = cache[token];
-		var baseURL   = ctx.app.base.pathname || "/";
 
 		if (updated) {
 			// Session save from client.
@@ -38,7 +40,7 @@ module.exports = function (options) {
 
 		return next().then(function () {
 			// Set cookie on new sessions.
-			if (String(session.id) !== token) res.cookie(ID, session.id, { path: baseURL });
+			if (String(session.id) !== token) res.cookie(ID, session.id, { path: path });
 
 			if (typeof res.body === "string") {
 				// Append state to html to avoid an extra round trip in the browser.

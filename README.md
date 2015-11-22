@@ -15,7 +15,8 @@ npm install @rill/session
 const app     = require("rill")();
 const session = require("@rill/session");
 
-app.use(require("@rill/session")({ max: 100 }));
+// Set up a session for all routes under admin. (Defaults to root "/").
+app.use(require("@rill/session")({ path: "/admin" }));
 
 // Use the session.
 app.use(function ({ req }, next) {

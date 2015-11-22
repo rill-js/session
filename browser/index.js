@@ -6,7 +6,7 @@ var DATA        = NAMESPACE + "_data";
 var SAVED       = NAMESPACE + "_last_saved";
 var session     = new Receptacle(window[DATA]);
 var lastSaved   = session.lastModified;
-var baseURL     = null;
+var basePath    = null;
 var curReq      = null;
 
 /**
@@ -14,9 +14,11 @@ var curReq      = null;
  *
  * @return {Function}
  */
-module.exports = function (options) {
+module.exports = function (opts) {
+	opts     = opts || {};
+	basePath = opts.path = "path" in opts ? opts.path : "/";
+
 	return function sessionMiddleware (ctx, next) {
-		baseURL        = ctx.app.base.pathname || "/";
 		curReq         = ctx.req;
 		curReq.session = session;
 		return next();
@@ -45,7 +47,7 @@ interceptor.on("response", function (headers) {
 addEventListener("beforeunload", function () {
 	if (session.lastModified > lastSaved) {
 		var xhr = new XMLHttpRequest;
-		xhr.open("HEAD", baseURL, false);
+		xhr.open("HEAD", basePath, false);
 		xhr.send();
 	}
 });
