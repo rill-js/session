@@ -14,8 +14,8 @@ var cache = {};
  * @return {Function}
  */
 module.exports = function (opts) {
-	opts      = opts || {};
-	opts.path = "path" in opts ? opts.path : "/";
+	opts     = opts || {};
+	var path = opts.path = "path" in opts ? opts.path : "/";
 
 	return function sessionMiddleware (ctx, next) {
 		var req       = ctx.req;
