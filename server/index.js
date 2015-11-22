@@ -43,7 +43,14 @@ module.exports = function (options) {
 			if (typeof res.body === "string") {
 				// Append state to html to avoid an extra round trip in the browser.
 				res.body = res.body.replace(head, function (m, head, content) {
-					return head + "<script>window." + DATA + " = " + JSON.stringify(session) + ";</script>" + "</head>";
+					return (
+						head +
+							content +
+							"<script>window." + DATA + " = " +
+								JSON.stringify(session) +
+							";</script>" +
+						"</head>"
+					);
 				});
 			} else if (Number(lastSaved) < session.lastModified) {
 				// If the session has been updated via ajax then we will send the updated session.
