@@ -18,7 +18,7 @@ const app = require("rill")();
 app.use(require("@rill/session")({ path: "/admin" }));
 
 // Use the session.
-app.use(function ({ session }, next) {
+app.use(({ session })=> {
 	// Sessions are instances of a "Receptacle" cache.
 	session.set("a", 1, { ttl: 1000 });
 	session.get("a"); // 1
