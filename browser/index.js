@@ -7,7 +7,7 @@ var SAVED       = NAMESPACE + "_last_saved";
 var session     = new Receptacle(window[DATA]);
 var lastSaved   = session.lastModified;
 var basePath    = null;
-var curReq      = null;
+var curCtx      = null;
 
 /**
  * Adds a session to a rill app and persists it between browser and server.
@@ -19,8 +19,8 @@ module.exports = function (opts) {
 	basePath = opts.path = "path" in opts ? opts.path : "/";
 
 	return function sessionMiddleware (ctx, next) {
-		curReq         = ctx.req;
-		curReq.session = session;
+		curCtx      = ctx;
+		curCtx.session = session;
 		return next();
 	};
 };
@@ -39,7 +39,7 @@ interceptor.on("request", function (headers) {
 interceptor.on("response", function (headers) {
 	var data = headers.get(DATA);
 	if (!data) return;
-	curReq.session = session = new Receptacle(JSON.parse(data));
+	curCtx.session = session = new Receptacle(JSON.parse(data));
 	lastSaved      = session.lastModified;
 });
 

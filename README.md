@@ -12,17 +12,16 @@ npm install @rill/session
 # Example
 
 ```javascript
-const app     = require("rill")();
-const session = require("@rill/session");
+const app = require("rill")();
 
-// Set up a session for all routes under admin. (Defaults to root "/").
+// Set up a session for all routes under admin. (Defaults to "/").
 app.use(require("@rill/session")({ path: "/admin" }));
 
 // Use the session.
-app.use(function ({ req }, next) {
+app.use(function ({ session }, next) {
 	// Sessions are instances of a "Receptacle" cache.
-	req.session.set("a", 1, { ttl: 1000 });
-	req.session.get("a"); // 1
+	session.set("a", 1, { ttl: 1000 });
+	session.get("a"); // 1
 });
 ```
 

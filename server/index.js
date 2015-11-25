@@ -36,7 +36,7 @@ module.exports = function (opts) {
 			session = cache[token];
 		}
 
-		cache[session.id] = req.session = session;
+		cache[session.id] = ctx.session = session;
 
 		return next().then(function () {
 			// Set cookie on new sessions.
