@@ -48,9 +48,10 @@ module.exports = function (opts) {
 					return (
 						head +
 							content +
-							"<script>window." + DATA + " = " +
-								JSON.stringify(session) +
-							";</script>" +
+							"<script id='" + DATA + "'>" +
+								"window." + DATA + " = " + JSON.stringify(session) + ";" +
+								"document.head.removeChild(document.getElementById('" + DATA + "'));" +
+							"</script>" +
 						"</head>"
 					);
 				});
