@@ -14,8 +14,7 @@ var cache = {};
  * @return {Function}
  */
 module.exports = function (opts) {
-	opts     = opts || {};
-	var path = opts.path = "path" in opts ? opts.path : "/";
+	opts = opts || {};
 
 	return function sessionMiddleware (ctx, next) {
 		var req       = ctx.req;
@@ -40,7 +39,7 @@ module.exports = function (opts) {
 
 		return next().then(function () {
 			// Set cookie on new sessions.
-			if (String(session.id) !== token) res.cookie(ID, session.id, { path: path });
+			if (String(session.id) !== token) res.cookie(ID, session.id, { path: "/" });
 
 			if (typeof res.body === "string") {
 				// Append state to html to avoid an extra round trip in the browser.

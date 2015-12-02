@@ -5,8 +5,7 @@ var ID          = NAMESPACE + "_id";
 var DATA        = NAMESPACE + "_data";
 var SAVED       = NAMESPACE + "_last_saved";
 var session     = new Receptacle(window[DATA]);
-var lastSaved   = session.lastModified;
-var basePath    = null;
+var lastSaved   = session.lastModified.valueOf();
 var curCtx      = null;
 
 /**
@@ -15,11 +14,10 @@ var curCtx      = null;
  * @return {Function}
  */
 module.exports = function (opts) {
-	opts     = opts || {};
-	basePath = opts.path = "path" in opts ? opts.path : "/";
+	opts = opts || {};
 
 	return function sessionMiddleware (ctx, next) {
-		curCtx      = ctx;
+		curCtx         = ctx;
 		curCtx.session = session;
 		return next();
 	};
@@ -28,10 +26,10 @@ module.exports = function (opts) {
 // Sync session with server on any request if the session has been modified.
 interceptor.on("request", function (headers) {
 	if (session.lastModified > lastSaved) {
-		lastSaved     = new Date;
+		lastSaved     = (new Date).valueOf();
 		headers[DATA] = JSON.stringify(session);
 	}
-	headers[SAVED] = String(lastSaved.valueOf());
+	headers[SAVED] = String(lastSaved);
 	headers[ID]    = session.id;
 });
 
@@ -47,7 +45,7 @@ interceptor.on("response", function (headers) {
 addEventListener("beforeunload", function () {
 	if (session.lastModified > lastSaved) {
 		var xhr = new XMLHttpRequest;
-		xhr.open("HEAD", basePath, false);
+		xhr.open("HEAD", curCtx.req.pathname, false);
 		xhr.send();
 	}
 });

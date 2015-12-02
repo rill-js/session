@@ -14,8 +14,8 @@ npm install @rill/session
 ```javascript
 const app = require("rill")();
 
-// Set up a session for all routes under admin. (Defaults to "/").
-app.use(require("@rill/session")({ path: "/admin" }));
+// Set up a session.
+app.use(require("@rill/session")());
 
 // Use the session.
 app.use(({ session })=> {
