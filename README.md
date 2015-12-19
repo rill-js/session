@@ -25,6 +25,14 @@ app.use(({ session })=> {
 });
 ```
 
+# Options
+
+```js
+{
+	"key": "__rill_session" // Optional key used for the session id cookie.
+}
+```
+
 # Implementation Details
 Rill session uses some tricks to ensure that a session is always up to date on both the browser.
 

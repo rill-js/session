@@ -1,12 +1,5 @@
 var Receptacle = require("receptacle");
-var NAMESPACE  = "__rill_session";
-var ID         = NAMESPACE + "_id";
-var DATA       = NAMESPACE + "_data";
-var SAVED      = NAMESPACE + "_last_saved";
 var head       = /(<head[^>]*>)(.*?)<\/head>/;
-
-// In memory storage for all sessions.
-var cache = {};
 
 /**
  * Adds a session to a rill app and persists it between browser and server.
@@ -14,7 +7,13 @@ var cache = {};
  * @return {Function}
  */
 module.exports = function (opts) {
-	opts = opts || {};
+	opts          = opts || {};
+	var NAMESPACE = opts.key || "__rill_session";
+	var ID        = NAMESPACE;
+	var DATA      = NAMESPACE + "_data";
+	var SAVED     = NAMESPACE + "_last_saved";
+	// In memory storage for this session.
+	var cache = {};
 
 	return function sessionMiddleware (ctx, next) {
 		var req       = ctx.req;

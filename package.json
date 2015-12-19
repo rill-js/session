@@ -29,7 +29,7 @@
     "supertest": "^1.1.0"
   },
   "dependencies": {
-    "receptacle": "^0.2.0",
+    "receptacle": "^0.2.1",
     "side-step": "^0.1.1"
   }
 }
