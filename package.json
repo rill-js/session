@@ -1,6 +1,6 @@
 {
   "name": "@rill/session",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "In memory sessions for Rill.",
   "author": "Dylan Piercey <pierceydylan@gmail.com>",
   "main": "server/index.js",
