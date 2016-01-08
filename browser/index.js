@@ -1,5 +1,8 @@
+var URL         = require("url");
 var Receptacle  = require("receptacle");
 var interceptor = require("side-step");
+
+console.log("got loaded");
 
 /**
  * Adds a session to a rill app and persists it between browser and server.
@@ -17,18 +20,22 @@ module.exports = function (opts) {
 	var curCtx    = null;
 
 	// Sync session with server on any request if the session has been modified.
-	interceptor.on("request", function (headers) {
+	interceptor.on("request", function (req) {
+		var headers = req.headers;
+		if (!isSameOrigin(req.url)) return;
 		if (session.lastModified > lastSaved) {
-			lastSaved     = (new Date).valueOf();
-			headers[DATA] = JSON.stringify(session);
+			lastSaved = (new Date).valueOf();
+			headers.set(DATA, JSON.stringify(session));
 		}
-		headers[SAVED] = String(lastSaved);
-		headers[ID]    = session.id;
+		headers.set(SAVED, String(lastSaved));
+		headers.set(ID, session.id);
 	});
 
 	// Sync local session if a response says that the session has been modified.
-	interceptor.on("response", function (headers) {
-		var data = headers.get(DATA);
+	interceptor.on("response", function (res) {
+		var headers = res.headers;
+		var data    = headers.get(DATA);
+		if (!isSameOrigin(res.url)) return;
 		if (!data) return;
 		curCtx.session = session = new Receptacle(JSON.parse(data));
 		lastSaved      = session.lastModified;
@@ -50,3 +57,6 @@ module.exports = function (opts) {
 	};
 };
 
+function isSameOrigin (url) {
+	return URL.parse(URL.resolve(location.origin, url || "")).host === location.host;
+}
