@@ -2,8 +2,6 @@ var URL         = require("url");
 var Receptacle  = require("receptacle");
 var interceptor = require("side-step");
 
-console.log("got loaded");
-
 /**
  * Adds a session to a rill app and persists it between browser and server.
  *
