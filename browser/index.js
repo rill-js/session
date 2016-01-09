@@ -56,5 +56,6 @@ module.exports = function (opts) {
 };
 
 function isSameOrigin (url) {
-	return URL.parse(URL.resolve(location.origin, url || "")).host === location.host;
+	var origin = location.protocol + "//" + location.hostname + (location.port ? ":" + location.port : "");
+	return URL.parse(URL.resolve(origin, url || location.href)).host === location.host;
 }
