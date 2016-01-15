@@ -19,8 +19,13 @@ module.exports = function (opts) {
 		return new Promise(function (accept, reject) {
 			xhr.addEventListener("readystatechange", function () {
 				if (xhr.readyState === 4) {
-					if (xhr.status === 200) accept();
-					else reject(new Error("Unable to sync @rill/session."));
+					if (xhr.status === 200) {
+						lastSaved = Number(new Date);
+						accept();
+					}
+					else {
+						reject(new Error("Unable to sync @rill/session."));
+					}
 				}
 			});
 			xhr.addEventListener("error", reject);
