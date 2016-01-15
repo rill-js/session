@@ -7,12 +7,14 @@ var Receptacle  = require("receptacle");
  * @return {Function}
  */
 module.exports = function (opts) {
-	opts        = opts || {};
-	var ID      = opts.key || "rill_session";
-	var DATA    = "__" + ID + "__";
-	var session = getInitialSession();
+	opts          = opts || {};
+	var ID        = opts.key || "rill_session";
+	var DATA      = "__" + ID + "__";
+	var session   = getInitialSession();
+	var lastSaved = window[DATA].lastModified;
 
 	session.save = function save () {
+		if (lastSaved >= session.lastModified) return Promise.resolve();
 		var xhr = new XMLHttpRequest;
 		return new Promise(function (accept, reject) {
 			xhr.addEventListener("readystatechange", function () {
