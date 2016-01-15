@@ -1,5 +1,6 @@
 var Receptacle = require("receptacle");
 var head       = /(<head[^>]*>)(.*?)<\/head>/;
+var noop       = function () { return Promise.resolve(); };
 
 /**
  * Adds a session to a rill app and persists it between browser and server.
@@ -7,40 +8,36 @@ var head       = /(<head[^>]*>)(.*?)<\/head>/;
  * @return {Function}
  */
 module.exports = function (opts) {
-	opts          = opts || {};
-	var NAMESPACE = opts.key || "__rill_session";
-	var ID        = NAMESPACE;
-	var DATA      = NAMESPACE + "_data";
-	var SAVED     = NAMESPACE + "_last_saved";
-	// In memory storage for this session.
+	opts      = opts || {};
+	var ID    = opts.key || "rill_session";
+	var DATA  = "__" + ID + "__";
 	var cache = {};
 
 	return function sessionMiddleware (ctx, next) {
-		var req       = ctx.req;
-		var res       = ctx.res;
-		var token     = req.cookies[ID] || req.get(ID);
-		var updated   = req.get(DATA);
-		var lastSaved = req.get(SAVED);
-		var session   = cache[token];
+		var req     = ctx.req;
+		var res     = ctx.res;
+		var token   = req.cookies[ID] || req.get(ID);
 
-		if (updated) {
-			// Session save from client.
-			session = new Receptacle(JSON.parse(updated));
-		} else if (!token || !session) {
-			// Client needs a session.
-			session = new Receptacle;
-		} else {
-			// Load existing session.
-			session = cache[token];
+		// Handle client side session saves.
+		if (req.query[DATA] && typeof req.body === "object") {
+			cache[req.query[DATA]] = new Receptacle(req.body);
+			res.status = 200;
+			return;
 		}
 
+		var session = (!token || !cache[token])
+			// Client needs a session.
+			? new Receptacle
+			// Load existing session.
+			: cache[token];
+
 		cache[session.id] = ctx.session = session;
+		session.save      = noop;
 
 		return next().then(function () {
 			// Set cookie on new sessions.
 			if (String(session.id) !== token) res.cookie(ID, session.id, { path: "/" });
-
-			if (typeof res.body === "string") {
+			if (head.test(res.body)) {
 				// Append state to html to avoid an extra round trip in the browser.
 				res.body = res.body.replace(head, function (m, head, content) {
 					return (
@@ -53,11 +50,7 @@ module.exports = function (opts) {
 						"</head>"
 					);
 				});
-			} else if (Number(lastSaved) < session.lastModified) {
-				// If the session has been updated via ajax then we will send the updated session.
-				res.set(DATA, JSON.stringify(session));
 			}
-
 		});
 	};
 };

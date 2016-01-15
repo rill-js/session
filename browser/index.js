@@ -1,6 +1,5 @@
 var URL         = require("url");
 var Receptacle  = require("receptacle");
-var interceptor = require("side-step");
 
 /**
  * Adds a session to a rill app and persists it between browser and server.
@@ -8,54 +7,49 @@ var interceptor = require("side-step");
  * @return {Function}
  */
 module.exports = function (opts) {
-	opts          = opts || {};
-	var NAMESPACE = opts.key || "__rill_session";
-	var ID        = NAMESPACE;
-	var DATA      = NAMESPACE + "_data";
-	var SAVED     = NAMESPACE + "_last_saved";
-	var session   = new Receptacle(window[DATA]);
-	var lastSaved = session.lastModified.valueOf();
-	var curCtx    = null;
+	opts        = opts || {};
+	var ID      = opts.key || "rill_session";
+	var DATA    = "__" + ID + "__";
+	var session = getInitialSession();
 
-	// Sync session with server on any request if the session has been modified.
-	interceptor.on("request", function (req) {
-		var headers = req.headers;
-		if (!isSameOrigin(req.url)) return;
-		if (session.lastModified > lastSaved) {
-			lastSaved = (new Date).valueOf();
-			headers.set(DATA, JSON.stringify(session));
-		}
-		headers.set(SAVED, String(lastSaved));
-		headers.set(ID, session.id);
-	});
+	session.save = function save () {
+		var xhr = new XMLHttpRequest;
+		return new Promise(function (accept, reject) {
+			xhr.addEventListener("readystatechange", function () {
+				if (xhr.readyState === 4) {
+					if (xhr.status === 200) accept();
+					else reject(new Error("Unable to sync @rill/session."));
+				}
+			});
+			xhr.addEventListener("error", reject);
+			xhr.open("POST", location.pathname + "?" + DATA + "=" + session.id);
+			xhr.setRequestHeader("Content-Type", "application/json");
+			xhr.send(JSON.stringify(session));
+		});
 
-	// Sync local session if a response says that the session has been modified.
-	interceptor.on("response", function (res) {
-		var headers = res.headers;
-		var data    = headers.get(DATA);
-		if (!isSameOrigin(res.url)) return;
-		if (!data) return;
-		curCtx.session = session = new Receptacle(JSON.parse(data));
-		lastSaved      = session.lastModified;
-	});
+	};
 
-	// Sync session with server before the page closes.
+	// Save session before page closes.
 	addEventListener("beforeunload", function () {
-		if (session.lastModified > lastSaved) {
-			var xhr = new XMLHttpRequest;
-			xhr.open("HEAD", curCtx.req.pathname, false);
-			xhr.send();
-		}
+		localStorage.setItem(DATA, JSON.stringify(session));
 	});
 
 	return function sessionMiddleware (ctx, next) {
-		curCtx         = ctx;
-		curCtx.session = session;
+		ctx.session = session;
 		return next();
 	};
-};
 
-function isSameOrigin (url) {
-	var origin = location.protocol + "//" + location.hostname + (location.port ? ":" + location.port : "");
-	return URL.parse(URL.resolve(origin, url || location.href)).host === location.host;
-}
+	function getInitialSession () {
+		var serverSession = window[DATA];
+		var localSession = localStorage.getItem(DATA);
+
+		if (!localSession) return new Receptacle(serverSession);
+		else localSession = JSON.parse(localSession);
+
+		return new Receptacle(
+			localSession.lastModified > serverSession.lastModified
+				? localSession
+				: serverSession
+		);
+	}
+};
