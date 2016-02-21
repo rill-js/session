@@ -1,5 +1,5 @@
 var Receptacle = require("receptacle");
-var head       = /(<head[^>]*>)(.*?)<\/head>/;
+var head       = /(<head[^>]*>)([\s\S]*)<\/head>/;
 var noop       = function () { return Promise.resolve(); };
 
 /**
