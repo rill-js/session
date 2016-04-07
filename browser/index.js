@@ -9,29 +9,41 @@ module.exports = function (opts) {
   opts = opts || {}
   var ID = opts.key || 'rill_session'
   var DATA = '__' + ID + '__'
-  var session = getInitialSession()
+  var loadSession = null
 
   // Save session before page closes.
   window.addEventListener('beforeunload', function () {
-    window.localStorage.setItem(DATA, JSON.stringify(session))
+    loadSession.then(function (session) {
+      window.localStorage.setItem(DATA, JSON.stringify(session))
+    })
   })
 
   return function sessionMiddleware (ctx, next) {
-    ctx.session = session
-    return next()
+    loadSession = loadSession || getInitialSession()
+    return loadSession.then(function (session) { ctx.session = session }).then(next)
   }
 
   function getInitialSession () {
-    var serverSession = window[DATA]
-    var localSession = window.localStorage.getItem(DATA)
+    return new Promise(function (resolve, reject) {
+      // Use last local session if we can.
+      var localSession = window.localStorage.getItem(DATA)
+      if (localSession) return resolve(new Receptacle(JSON.parse(localSession)))
 
-    if (!localSession) return new Receptacle(serverSession)
-    else localSession = JSON.parse(localSession)
-
-    return new Receptacle(
-      localSession.lastModified > serverSession.lastModified
-        ? localSession
-        : serverSession
-    )
+      // Do a request to the server asking for the session.
+      var xhr = new window.XMLHttpRequest()
+      xhr.addEventListener('readystatechange', function () {
+        if (xhr.readyState !== 4) return
+        if (xhr.status !== 200) return reject(new Error('Could not load initial session.'))
+        try {
+          resolve(new Receptacle(JSON.parse(xhr.responseText)))
+        } catch (err) {
+          reject(new Error('Could not load initial session.'))
+        }
+      })
+      xhr.addEventListener('error', reject)
+      xhr.open('GET', DATA, true)
+      xhr.setRequestHeader(DATA, '1')
+      xhr.send()
+    })
   }
 }
