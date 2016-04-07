@@ -42,6 +42,7 @@ in real time back and forth. Instead the session can exist on the server and is 
 after which the client takes over (if it can).
 
 In the browser sessions will be persisted with local storage.
+
 ---
 
 ### Contributions

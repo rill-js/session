@@ -1,7 +1,7 @@
 {
   "name": "@rill/session",
   "description": "isomorphic sessions for Rill.",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "author": "Dylan Piercey <pierceydylan@gmail.com>",
   "browser": "browser/index.js",
   "bugs": "https://github.com/rill-js/session/issues",
