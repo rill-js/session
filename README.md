@@ -39,7 +39,7 @@ app.use(({ session })=> {
 # Implementation Details
 Rill sessions work in both the client and server however only the initial session from the server with the user will be synced using an XHR request.
 
-In the browser sessions will be persisted with local storage and reused on subsequent page loads.
+In the browser sessions will be persisted with session storage and reused on subsequent page loads.
 
 ---
 

@@ -26,6 +26,10 @@ module.exports = function (opts) {
     if (req.get(DATA)) {
       res.status = 200
       res.body = session.toJSON()
+      // Ensure session is not cached.
+      res.set("Cache-Control", "no-cache, no-store, must-revalidate");
+      res.set("Pragma", "no-cache");
+      res.set("Expires", "0");
       return
     }
 

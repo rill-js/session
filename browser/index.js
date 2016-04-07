@@ -9,26 +9,31 @@ module.exports = function (opts) {
   opts = opts || {}
   var ID = opts.key || 'rill_session'
   var DATA = '__' + ID + '__'
-  var loadSession = null
+  var loadSession = getInitialSession()
   var activeSession = null
 
-  // Save session before page closes.
+  // Persist current session to disk when the browser exits.
   window.addEventListener('beforeunload', function () {
-    if (activeSession) {
-      window.localStorage.setItem(DATA, JSON.stringify(activeSession))
+    if (activeSession && window.sessionStorage) {
+      window.sessionStorage.setItem(DATA, JSON.stringify(activeSession))
     }
   })
 
   return function sessionMiddleware (ctx, next) {
-    loadSession = loadSession || getInitialSession()
-    return loadSession.then(function (session) { activeSession = ctx.session = session }).then(next)
+    return loadSession
+      // Add session to request.
+      .then(function (session) { activeSession = ctx.session = session })
+      // Run middleware.
+      .then(next)
   }
 
   function getInitialSession () {
     return new Promise(function (resolve, reject) {
       // Use last local session if we can.
-      var localSession = window.localStorage.getItem(DATA)
-      if (localSession) return resolve(new Receptacle(JSON.parse(localSession)))
+      if (window.sessionStorage) {
+        var localSession = window.sessionStorage.getItem(DATA)
+        if (localSession) return resolve(new Receptacle(JSON.parse(localSession)))
+      }
 
       // Do a request to the server asking for the session.
       var xhr = new window.XMLHttpRequest()
