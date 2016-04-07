@@ -10,17 +10,18 @@ module.exports = function (opts) {
   var ID = opts.key || 'rill_session'
   var DATA = '__' + ID + '__'
   var loadSession = null
+  var activeSession = null
 
   // Save session before page closes.
   window.addEventListener('beforeunload', function () {
-    loadSession.then(function (session) {
-      window.localStorage.setItem(DATA, JSON.stringify(session))
-    })
+    if (activeSession) {
+      window.localStorage.setItem(DATA, JSON.stringify(activeSession))
+    }
   })
 
   return function sessionMiddleware (ctx, next) {
     loadSession = loadSession || getInitialSession()
-    return loadSession.then(function (session) { ctx.session = session }).then(next)
+    return loadSession.then(function (session) { activeSession = ctx.session = session }).then(next)
   }
 
   function getInitialSession () {
