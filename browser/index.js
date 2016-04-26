@@ -16,11 +16,13 @@ module.exports = function (opts) {
   window.addEventListener('beforeunload', function () {
     if (!activeSession) return
     // Do a request to the server to save the session.
-    var xhr = new window.XMLHttpRequest()
-    xhr.open('POST', DATA, false)
-    xhr.setRequestHeader(DATA, '1')
-    xhr.setRequestHeader('content-type', 'application/json; charset=UTF-8')
-    xhr.send(JSON.stringify(activeSession))
+    try {
+      var xhr = new window.XMLHttpRequest()
+      xhr.open('POST', DATA, false)
+      xhr.setRequestHeader(DATA, '1')
+      xhr.setRequestHeader('content-type', 'application/json; charset=UTF-8')
+      xhr.send(JSON.stringify(activeSession))
+    } catch (_) {}
   })
 
   return function sessionMiddleware (ctx, next) {
