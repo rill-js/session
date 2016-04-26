@@ -14,9 +14,13 @@ module.exports = function (opts) {
 
   // Persist current session to disk when the browser exits.
   window.addEventListener('beforeunload', function () {
-    if (activeSession && window.sessionStorage) {
-      window.sessionStorage.setItem(DATA, JSON.stringify(activeSession))
-    }
+    if (!activeSession) return
+    // Do a request to the server to save the session.
+    var xhr = new window.XMLHttpRequest()
+    xhr.open('POST', DATA, false)
+    xhr.setRequestHeader(DATA, '1')
+    xhr.setRequestHeader('content-type', 'application/json; charset=UTF-8')
+    xhr.send(JSON.stringify(activeSession))
   })
 
   return function sessionMiddleware (ctx, next) {
@@ -29,12 +33,6 @@ module.exports = function (opts) {
 
   function getInitialSession () {
     return new Promise(function (resolve, reject) {
-      // Use last local session if we can.
-      if (window.sessionStorage) {
-        var localSession = window.sessionStorage.getItem(DATA)
-        if (localSession) return resolve(new Receptacle(JSON.parse(localSession)))
-      }
-
       // Do a request to the server asking for the session.
       var xhr = new window.XMLHttpRequest()
       xhr.addEventListener('readystatechange', function () {

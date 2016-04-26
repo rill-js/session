@@ -22,15 +22,25 @@ module.exports = function (opts) {
       // Load existing session.
       : cache[token]
 
-    // Respond to a session load request.
+    // Respond to a session request.
     if (req.get(DATA)) {
-      res.status = 200
-      res.body = session.toJSON()
       // Ensure session is not cached.
-      res.set("Cache-Control", "no-cache, no-store, must-revalidate");
-      res.set("Pragma", "no-cache");
-      res.set("Expires", "0");
-      return
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate')
+      res.set('Pragma', 'no-cache')
+      res.set('Expires', '0')
+      res.status = 200
+
+      // Handle session load.
+      if (req.method === 'GET') {
+        res.body = session.toJSON()
+        return
+      }
+
+      // Handle session save.
+      if (req.method === 'POST') {
+        cache[token] = new Receptacle(req.body)
+        return
+      }
     }
 
     // Set cookie on new sessions.
