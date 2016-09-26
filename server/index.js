@@ -16,8 +16,7 @@ module.exports = function (opts) {
   return function sessionMiddleware (ctx, next) {
     var req = ctx.req
     var res = ctx.res
-    var token = req.cookies[ID] || req.get(ID)
-
+    var token = req.cookies[ID]
     var session = (!token || !cache[token])
       // Client needs a session.
       ? new Receptacle()
@@ -47,7 +46,7 @@ module.exports = function (opts) {
 
     // Set cookie on new sessions.
     if (String(session.id) !== token) {
-      res.cookie(ID, session.id, { path: '/' })
+      res.cookie(ID, session.id, { path: '/', httpOnly: true })
     }
 
     // Attach session for the request.
