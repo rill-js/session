@@ -6,13 +6,13 @@
   "browser": "browser/index.js",
   "bugs": "https://github.com/rill-js/session/issues",
   "dependencies": {
-    "receptacle": "^1.0.0"
+    "receptacle": "^1.0.1"
   },
   "devDependencies": {
-    "mocha": "^3.0.2",
-    "rill": "^2.1.7",
+    "mocha": "^3.1.2",
+    "rill": "^2.3.2",
     "snazzy": "^5.0.0",
-    "standard": "^8.1.0",
+    "standard": "^8.4.0",
     "supertest": "^2.0.0"
   },
   "homepage": "https://github.com/rill-js/session",
