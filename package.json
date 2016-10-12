@@ -6,7 +6,7 @@
   "browser": "browser/index.js",
   "bugs": "https://github.com/rill-js/session/issues",
   "dependencies": {
-    "receptacle": "^1.0.2"
+    "receptacle": "^1.0.3"
   },
   "devDependencies": {
     "mocha": "^3.1.2",
