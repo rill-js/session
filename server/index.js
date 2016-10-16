@@ -46,7 +46,7 @@ module.exports = function (opts) {
 
     // Set cookie on new sessions.
     if (String(session.id) !== token) {
-      res.cookie(ID, session.id, { path: '/', httpOnly: true })
+      res.cookie(ID, session.id, { path: '/' })
     }
 
     // Attach session for the request.
