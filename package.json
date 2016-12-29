@@ -1,13 +1,13 @@
 {
   "name": "@rill/session",
   "description": "isomorphic sessions for Rill.",
-  "version": "7.2.1",
+  "version": "7.2.2",
   "author": "Dylan Piercey <pierceydylan@gmail.com>",
   "browser": "browser/index.js",
   "bugs": "https://github.com/rill-js/session/issues",
   "dependencies": {
     "cacheman": "^2.2.1",
-    "receptacle": "^1.0.4"
+    "receptacle": "^1.0.5"
   },
   "devDependencies": {
     "mocha": "^3.2.0",
