@@ -28,6 +28,7 @@ module.exports = function (opts) {
       })
 
     return load.then(function (session) {
+      var initialModified = session.lastModified
       // Respond to a session request.
       if (req.get(DATA)) {
         // Ensure session is not cached.
@@ -46,8 +47,6 @@ module.exports = function (opts) {
         if (req.method === 'POST') {
           return saveSession()
         }
-
-        return
       }
 
       // Set cookie on new sessions.
@@ -64,6 +63,7 @@ module.exports = function (opts) {
       // Utility to save the session and forward errors.
       function saveSession (err) {
         return new Promise(function (resolve, reject) {
+          if (session.lastModified === initialModified) return resolve()
           cache.set(String(session.id), session.toJSON(), function (err) {
             if (err) return reject(err)
             else resolve()
