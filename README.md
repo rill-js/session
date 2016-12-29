@@ -30,6 +30,8 @@
 Isomorphic session middleware that will provided consistent sessions from client to server.
 Sessions are instances of [Receptacle](https://github.com/DylanPiercey/receptacle), check out the docs for modifying the session.
 
+Session storage on the server side is done by [cacheman](https://github.com/cayasso/cacheman) and you can provide configuration via the `cache` option.
+
 # Installation
 
 ```console
@@ -41,7 +43,7 @@ npm install @rill/session
 ```javascript
 const app = require('rill')()
 
-// Set up a session.
+// Set up a session. (Defaults to in memory)
 app.use(require('@rill/session')())
 
 // Use the session.
@@ -57,6 +59,11 @@ app.use(({ session })=> {
 ```js
 {
 	"key": "rill_session" // Optional key used for the session id cookie.
+  "cache": {// Passed to cacheman on the server side only.
+    // Mongo db example. (must have installed cacheman-mongo).
+    engine: 'mongo',
+    database: 'my-app'
+  }
 }
 ```
 
