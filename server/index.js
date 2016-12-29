@@ -45,7 +45,12 @@ module.exports = function (opts) {
 
         // Handle session save.
         if (req.method === 'POST') {
-          return saveSession()
+          return new Promise(function (resolve, reject) {
+            cache.set(String(req.body.id), req.body, function (err) {
+              if (err) return reject(err)
+              else resolve()
+            })
+          })
         }
       }
 
