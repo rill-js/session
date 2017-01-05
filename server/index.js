@@ -23,6 +23,12 @@ module.exports = function (opts) {
       ? Promise.resolve(new Receptacle())
       // Load existing session.
       : cache.get(token).then(function (data) {
+        try {
+          data = JSON.parse(data)
+        } catch (err) {
+          data = undefined
+        }
+
         if (!data) return new Receptacle()
         return new Receptacle(data)
       })
@@ -46,7 +52,7 @@ module.exports = function (opts) {
         // Handle session save.
         if (req.method === 'POST') {
           return new Promise(function (resolve, reject) {
-            cache.set(String(req.body.id), req.body, function (err) {
+            cache.set(String(req.body.id), JSON.stringify(req.body), function (err) {
               if (err) return reject(err)
               else resolve()
             })
@@ -69,7 +75,7 @@ module.exports = function (opts) {
       function saveSession (err) {
         return new Promise(function (resolve, reject) {
           if (session.lastModified === initialModified) return resolve()
-          cache.set(String(session.id), session.toJSON(), function (err) {
+          cache.set(String(session.id), JSON.stringify(session), function (err) {
             if (err) return reject(err)
             else resolve()
           })
