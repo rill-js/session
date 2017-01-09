@@ -79,7 +79,7 @@ module.exports = function (opts) {
             if (err) return reject(err)
             else resolve()
           })
-        }).then(err ? Promise.reject(err) : Promise.resolve())
+        }).then(function rethrow () { if (err) throw err })
       }
     })
   }
