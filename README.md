@@ -48,9 +48,9 @@ app.use(require('@rill/session')())
 
 // Use the session.
 app.use(({ session })=> {
-	// Sessions are instances of a "Receptacle" cache.
-	session.set('a', 1, { ttl: 1000 });
-	session.get('a'); // 1
+  // Sessions are instances of a "Receptacle" cache.
+  session.set('a', 1, { ttl: 1000 });
+  session.get('a'); // 1
 });
 ```
 
@@ -58,7 +58,7 @@ app.use(({ session })=> {
 
 ```js
 {
-	"key": "rill_session" // Optional key used for the session id cookie.
+  "key": "rill_session" // Optional key used for the session id cookie.
   "cache": {// Passed to cacheman on the server side only.
     // Mongo db example. (must have installed cacheman-mongo).
     engine: 'mongo',
