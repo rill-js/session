@@ -18,6 +18,31 @@ module.exports = function (opts) {
     var req = ctx.req
     var res = ctx.res
     var token = req.cookies[ID]
+    var isTransfer = req.get(DATA)
+
+    // Handle session get/save.
+    if (isTransfer) {
+      switch (req.method) {
+        case 'GET':
+          return cache.get(token).then(function (data) {
+            // Ensure session is not cached.
+            res.set('Content-Type', 'application/json')
+            res.set('Cache-Control', 'no-cache, no-store, must-revalidate')
+            res.set('Pragma', 'no-cache')
+            res.set('Expires', '0')
+            res.status = data ? 200 : 204
+            res.body = data
+          })
+        case 'POST':
+          return cache.set(String(req.body.id), JSON.stringify(req.body), '100y').then(function () {
+            res.status = 200
+            res.body = 'ok'
+          })
+        default: return
+      }
+    }
+
+    // Load session for middleware to use.
     var load = !token
       // Client needs a session.
       ? Promise.resolve(new Receptacle())
@@ -34,52 +59,30 @@ module.exports = function (opts) {
       })
 
     return load.then(function (session) {
+      // Track the original modified time for the session.
       var initialModified = session.lastModified
-      // Respond to a session request.
-      if (req.get(DATA)) {
-        // Ensure session is not cached.
-        res.set('Cache-Control', 'no-cache, no-store, must-revalidate')
-        res.set('Pragma', 'no-cache')
-        res.set('Expires', '0')
-        res.status = 200
-
-        // Handle session load.
-        if (req.method === 'GET') {
-          res.body = session.toJSON()
-          return
-        }
-
-        // Handle session save.
-        if (req.method === 'POST') {
-          return new Promise(function (resolve, reject) {
-            cache.set(String(req.body.id), JSON.stringify(req.body), function (err) {
-              if (err) return reject(err)
-              else resolve()
-            })
-          })
-        }
-      }
-
-      // Set cookie on new sessions.
-      if (String(session.id) !== token) {
-        res.cookie(ID, session.id, { path: '/', httpOnly: true, secure: req.secure })
-      }
 
       // Attach session to the context.
       ctx.session = session
 
       // Run middleware then save updated session.
-      return next().then(saveSession).catch(saveSession)
+      return next().then(saveSession, saveSession)
 
       // Utility to save the session and forward errors.
       function saveSession (err) {
-        return new Promise(function (resolve, reject) {
-          if (session.lastModified === initialModified) return resolve()
-          cache.set(String(session.id), JSON.stringify(session), function (err) {
-            if (err) return reject(err)
-            else resolve()
-          })
-        }).then(function rethrow () { if (err) throw err })
+        if (String(session.id) !== token) {
+          // Set cookie on new sessions.
+          res.cookie(ID, session.id, { path: '/', httpOnly: true, secure: req.secure })
+        } else if (session.lastModified === initialModified) {
+          // Skip saving if we have not changed the session.
+          return rethrow(err)
+        }
+
+        // Persist session.
+        return cache.set(String(session.id), JSON.stringify(session), '100y').then(rethrow)
+
+        // If an error is provided it will throw it again.
+        function rethrow () { if (err) throw err }
       }
     })
   }

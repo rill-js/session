@@ -7,14 +7,14 @@
   "bugs": "https://github.com/rill-js/session/issues",
   "dependencies": {
     "cacheman": "^2.2.1",
-    "receptacle": "^1.0.5"
+    "receptacle": "^1.1.0"
   },
   "devDependencies": {
     "mocha": "^3.2.0",
-    "rill": "^2.5.1",
-    "snazzy": "^5.0.0",
-    "standard": "^8.6.0",
-    "supertest": "^2.0.1"
+    "rill": "^4.3.3",
+    "snazzy": "^7.0.0",
+    "standard": "^10.0.1",
+    "supertest": "^3.0.0"
   },
   "homepage": "https://github.com/rill-js/session",
   "keywords": [

@@ -50,6 +50,7 @@ module.exports = function (opts) {
       })
       xhr.addEventListener('error', reject)
       xhr.open('GET', DATA, true)
+      xhr.withCredentials = true
       xhr.setRequestHeader(DATA, '1')
       xhr.send()
     })
