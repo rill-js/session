@@ -10,6 +10,9 @@ var Cache = require('cacheman')
  */
 module.exports = function (opts) {
   opts = opts || {}
+  opts.cache = opts.cache || {}
+  opts.cache.ttl = opts.cache.ttl || Number.MAX_VALUE
+
   var ID = opts.key || 'rill_session'
   var DATA = '__' + ID + '__'
   var cache = new Cache(ID, opts.cache)
