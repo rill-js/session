@@ -38,7 +38,7 @@ module.exports = function (opts) {
             res.body = data
           })
         case 'POST':
-          return cache.set(String(req.body.id), JSON.stringify(req.body), '100y').then(function () {
+          return cache.set(String(req.body.id), JSON.stringify(req.body)).then(function () {
             res.status = 200
             res.body = 'ok'
           })
