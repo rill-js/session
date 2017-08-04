@@ -10,8 +10,10 @@ var Cache = require('cacheman')
  */
 module.exports = function (opts) {
   opts = opts || {}
+  opts.name = opts.name || 'session'
   opts.cache = opts.cache || {}
   opts.cache.ttl = opts.cache.ttl || Number.MAX_VALUE
+  opts.browser = !('browser' in opts) || opts.browser
 
   var ID = opts.key || 'rill_session'
   var DATA = '__' + ID + '__'
@@ -24,7 +26,7 @@ module.exports = function (opts) {
     var isTransfer = req.get(DATA)
 
     // Handle session get/save.
-    if (isTransfer) {
+    if (opts.browser && isTransfer) {
       switch (req.method) {
         case 'GET':
           return cache.get(token).then(function (data) {
@@ -66,7 +68,7 @@ module.exports = function (opts) {
       var initialModified = session.lastModified
 
       // Attach session to the context.
-      ctx.session = session
+      ctx[opts.name] = session
 
       // Run middleware then save updated session.
       return next().then(saveSession, saveSession)

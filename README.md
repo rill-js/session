@@ -58,9 +58,27 @@ app.use(({ session })=> {
 
 ```js
 {
-  "key": "rill_session" // Optional key used for the session id cookie.
-  "cache": {// Passed to cacheman on the server side only.
-    // Mongo db example. (must have installed cacheman-mongo).
+  /**
+   * Optional key used for the session id cookie.
+   */
+  key: 'rill_session',
+  /**
+   * Optional key to use as the name of the session on the context.
+   * This allows for having multiple sessions (even with different adapters) all with different names.
+   * By default they will all use the name 'session'.
+   */
+  name: 'mySession',
+  /**
+   * By default the session is shared with the browser and therefor public.
+   * You can disable this by setting browser to false which will only make the session visible server side and disables the sync apis.
+   */
+  browser: true,
+  /**
+   * Passed to cacheman, do not send this to client.
+   * Mongo db example. (must have installed cacheman-mongo).
+   * Default is in memory.
+   */
+  cache: !process.brower && {
     engine: 'mongo',
     database: 'my-app'
   }

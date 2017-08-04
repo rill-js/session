@@ -9,6 +9,11 @@ var Receptacle = require('receptacle')
  */
 module.exports = function (opts) {
   opts = opts || {}
+  opts.name = opts.name || 'session'
+  opts.browser = !('browser' in opts) || opts.browser
+  // Don't try to load session if it isn't setup for the browser.
+  if (!opts.browser) return
+
   var ID = opts.key || 'rill_session'
   var DATA = '__' + ID + '__'
   var loadSession = getInitialSession()
@@ -30,7 +35,7 @@ module.exports = function (opts) {
   return function sessionMiddleware (ctx, next) {
     return loadSession
       // Add session to request.
-      .then(function (session) { activeSession = ctx.session = session })
+      .then(function (session) { activeSession = ctx[opts.name] = session })
       // Run middleware.
       .then(next)
   }
