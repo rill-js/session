@@ -1,7 +1,7 @@
 'use strict'
 
+var Cache = require('keyv')
 var Receptacle = require('receptacle')
-var Cache = require('cacheman')
 
 /**
  * Adds a session to a rill app and persists it between browser and server.
@@ -12,12 +12,11 @@ module.exports = function (opts) {
   opts = opts || {}
   opts.name = opts.name || 'session'
   opts.cache = opts.cache || {}
-  opts.cache.ttl = opts.cache.ttl || Number.MAX_VALUE
   opts.browser = !('browser' in opts) || opts.browser
 
-  var ID = opts.key || 'rill_session'
+  var ID = opts.cache.namespace = opts.key || 'rill_session'
   var DATA = '__' + ID + '__'
-  var cache = new Cache(ID, opts.cache)
+  var cache = new Cache(opts.cache)
 
   return function sessionMiddleware (ctx, next) {
     var req = ctx.req
@@ -80,17 +79,14 @@ module.exports = function (opts) {
           res.cookie(ID, session.id, { path: '/', httpOnly: true, secure: req.secure })
         } else if (session.lastModified === initialModified) {
           // Skip saving if we have not changed the session.
-          if (err) throw err
+          rethrow(err)
         }
 
         // Persist session.
-        return new Promise(function (resolve, reject) {
-          cache.set(String(session.id), JSON.stringify(session), function (_err) {
-            err = err || _err
-            if (err) reject(err)
-            else resolve()
-          })
-        })
+        return cache.set(String(session.id), JSON.stringify(session)).then(rethrow)
+
+        // Utility to rethrow an error if there was one.
+        function rethrow () { if (err) { throw err } }
       }
     })
   }

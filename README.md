@@ -30,7 +30,7 @@
 Isomorphic session middleware that will provided consistent sessions from client to server.
 Sessions are instances of [Receptacle](https://github.com/DylanPiercey/receptacle), check out the docs for modifying the session.
 
-Session storage on the server side is done by [cacheman](https://github.com/cayasso/cacheman) and you can provide configuration via the `cache` option.
+Session storage on the server side is done by [keyv](https://github.com/lukechilds/keyv) and you can provide configuration via the `cache` option.
 
 # Installation
 
@@ -59,7 +59,7 @@ app.use(({ session })=> {
 ```js
 {
   /**
-   * Optional key used for the session id cookie.
+   * Optional key used for the session id cookie and keyv namespace.
    */
   key: 'rill_session',
   /**
@@ -74,13 +74,12 @@ app.use(({ session })=> {
    */
   browser: true,
   /**
-   * Passed to cacheman, do not send this to client.
-   * Mongo db example. (must have installed cacheman-mongo).
+   * Passed to keyv, do not send this to client.
+   * Mongo db example. (must have installed keyv-mongo).
    * Default is in memory.
    */
   cache: !process.brower && {
-    engine: 'mongo',
-    database: 'my-app'
+    uri: 'mongodb://user:pass@localhost:27017/dbname' // Default is in memory (see keyv uri).
   }
 }
 ```
