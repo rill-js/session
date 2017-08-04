@@ -80,14 +80,17 @@ module.exports = function (opts) {
           res.cookie(ID, session.id, { path: '/', httpOnly: true, secure: req.secure })
         } else if (session.lastModified === initialModified) {
           // Skip saving if we have not changed the session.
-          return rethrow(err)
+          if (err) throw err
         }
 
         // Persist session.
-        return cache.set(String(session.id), JSON.stringify(session), '100y').then(rethrow)
-
-        // If an error is provided it will throw it again.
-        function rethrow () { if (err) throw err }
+        return new Promise(function (resolve, reject) {
+          cache.set(String(session.id), JSON.stringify(session), function (_err) {
+            err = err || _err
+            if (err) reject(err)
+            else resolve()
+          })
+        })
       }
     })
   }
