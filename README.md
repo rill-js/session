@@ -63,7 +63,7 @@ app.use(({ session })=> {
    */
   key: 'rill_session',
   /**
-   * Optional key to use as the name of the session on the context.
+   * Optional key to use as the name of the session on the Rill context.
    * This allows for having multiple sessions (even with different adapters) all with different names.
    * By default they will all use the name 'session'.
    */
@@ -74,11 +74,17 @@ app.use(({ session })=> {
    */
   browser: true,
   /**
+   * By default @rill/session will add an http header to preload the session in the browser.
+   * This improves performance by fetching your javascript and the session in parallel in supported browsers.
+   * You can disable this by setting preload to false which will instead fetch the session after the main javascript has loaded.
+   */
+  preload: true,
+  /**
    * Passed to keyv, do not send this to client.
    * Mongo db example. (must have installed keyv-mongo).
    * Default is in memory.
    */
-  cache: !process.brower && {
+  cache: !process.browser && {
     uri: 'mongodb://user:pass@localhost:27017/dbname' // Default is in memory (see keyv uri).
   }
 }

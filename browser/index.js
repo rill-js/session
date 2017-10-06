@@ -15,7 +15,7 @@ module.exports = function (opts) {
   if (!opts.browser) return
 
   var ID = opts.key || 'rill_session'
-  var DATA = '__' + ID + '__'
+  var URL = '/__' + encodeURIComponent(ID) + '__'
   var loadSession = getInitialSession()
   var activeSession = null
 
@@ -25,8 +25,7 @@ module.exports = function (opts) {
     // Do a request to the server to save the session.
     try {
       var xhr = new window.XMLHttpRequest()
-      xhr.open('POST', DATA, false)
-      xhr.setRequestHeader(DATA, '1')
+      xhr.open('POST', URL, false)
       xhr.setRequestHeader('content-type', 'application/json; charset=UTF-8')
       xhr.send(JSON.stringify(activeSession))
     } catch (_) {}
@@ -54,9 +53,8 @@ module.exports = function (opts) {
         }
       })
       xhr.addEventListener('error', reject)
-      xhr.open('GET', DATA, true)
+      xhr.open('GET', URL, true)
       xhr.withCredentials = true
-      xhr.setRequestHeader(DATA, '1')
       xhr.send()
     })
   }

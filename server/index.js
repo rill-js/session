@@ -13,16 +13,17 @@ module.exports = function (opts) {
   opts.name = opts.name || 'session'
   opts.cache = opts.cache || {}
   opts.browser = !('browser' in opts) || opts.browser
+  opts.preload = !('preload' in opts) || opts.preload
 
   var ID = opts.cache.namespace = opts.key || 'rill_session'
-  var DATA = '__' + ID + '__'
+  var URL = '/__' + encodeURIComponent(ID) + '__'
   var cache = new Cache(opts.cache)
 
   return function sessionMiddleware (ctx, next) {
     var req = ctx.req
     var res = ctx.res
     var token = req.cookies[ID]
-    var isTransfer = req.get(DATA)
+    var isTransfer = req.pathname === URL
 
     // Handle session get/save.
     if (opts.browser && isTransfer) {
@@ -80,6 +81,12 @@ module.exports = function (opts) {
         } else if (session.lastModified === initialModified) {
           // Skip saving if we have not changed the session.
           rethrow(err)
+        }
+
+        // Preload session data on html requests.
+        var contentType = res.get('Content-Type')
+        if (opts.preload && contentType && contentType.indexOf('text/html') === 0) {
+          res.append('Link', '<' + URL + '>; rel=preload; as=fetch;')
         }
 
         // Persist session.
