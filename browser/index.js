@@ -1,6 +1,8 @@
 'use strict'
 
 var Receptacle = require('receptacle')
+var doc = document
+var head = doc.head
 
 /**
  * Adds a session to a rill app and persists it between browser and server.
@@ -41,21 +43,15 @@ module.exports = function (opts) {
 
   function getInitialSession () {
     return new Promise(function (resolve, reject) {
-      // Do a request to the server asking for the session.
-      var xhr = new window.XMLHttpRequest()
-      xhr.addEventListener('readystatechange', function () {
-        if (xhr.readyState !== 4) return
-        if (xhr.status !== 200) return reject(new Error('Could not load initial session.'))
-        try {
-          resolve(new Receptacle(JSON.parse(xhr.responseText)))
-        } catch (err) {
-          reject(new Error('Could not load initial session.'))
-        }
-      })
-      xhr.addEventListener('error', reject)
-      xhr.open('GET', URL, true)
-      xhr.withCredentials = true
-      xhr.send()
+      var script = doc.createElement('script')
+      script.onload = function () {
+        resolve(new Receptacle(window[URL]))
+        delete window[URL]
+      }
+      script.async = true
+      script.src = URL
+      head.appendChild(script)
+      head.removeChild(script)
     })
   }
 }

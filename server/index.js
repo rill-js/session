@@ -31,12 +31,12 @@ module.exports = function (opts) {
         case 'GET':
           return cache.get(token).then(function (data) {
             // Ensure session is not cached.
-            res.set('Content-Type', 'application/json')
+            res.set('Content-Type', 'application/javascript')
             res.set('Cache-Control', 'no-cache, no-store, must-revalidate')
             res.set('Pragma', 'no-cache')
             res.set('Expires', '0')
-            res.status = data ? 200 : 204
-            res.body = data
+            // Send session as jsonp (this is done so that it can be preloaded via a script tag).
+            res.body = 'window["' + URL + '"] = ' + (data || '{}')
           })
         case 'POST':
           return cache.set(String(req.body.id), JSON.stringify(req.body)).then(function () {
@@ -86,7 +86,7 @@ module.exports = function (opts) {
         // Preload session data on html requests.
         var contentType = res.get('Content-Type')
         if (opts.preload && contentType && contentType.indexOf('text/html') === 0) {
-          res.append('Link', '<' + URL + '>; rel=preload; as=fetch;')
+          res.append('Link', '<' + URL + '>; rel=preload; as=script;')
         }
 
         // Persist session.
