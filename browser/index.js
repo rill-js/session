@@ -22,15 +22,12 @@ module.exports = function (opts) {
   var activeSession = null
 
   // Persist current session to disk when the browser exits.
-  window.addEventListener('beforeunload', function () {
-    if (!activeSession) return
-    // Do a request to the server to save the session.
-    try {
-      var xhr = new window.XMLHttpRequest()
-      xhr.open('POST', URL, false)
-      xhr.setRequestHeader('content-type', 'application/json; charset=UTF-8')
-      xhr.send(JSON.stringify(activeSession))
-    } catch (_) {}
+  window.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') {
+      if (activeSession) {
+        navigator.sendBeacon(URL, JSON.stringify(activeSession))
+      }
+    }
   })
 
   return function sessionMiddleware (ctx, next) {
