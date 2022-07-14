@@ -51,7 +51,7 @@ module.exports = function (opts) {
         })
       }
       script.async = true
-      script.src = URL + '?' + Date.now().toString(32)
+      script.src = URL
       head.appendChild(script)
       head.removeChild(script)
     })

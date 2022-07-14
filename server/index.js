@@ -32,9 +32,10 @@ module.exports = function (opts) {
           return cache.get(token).then(function (data) {
             // Ensure session is not cached.
             res.set('Content-Type', 'application/javascript')
-            res.set('Cache-Control', 'no-cache, no-store, must-revalidate')
+            res.set('Cache-Control', 'max-age=0, no-cache, no-store, must-revalidate')
             res.set('Pragma', 'no-cache')
-            res.set('Expires', '0')
+            res.set('Expires', '-1')
+            res.set('Vary', '*')
             // Send session as jsonp (this is done so that it can be preloaded via a script tag).
             res.body = 'window["' + URL + '"] = ' + (data || '{}')
           })
