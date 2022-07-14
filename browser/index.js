@@ -21,32 +21,37 @@ module.exports = function (opts) {
   var loadSession = getInitialSession()
   var activeSession = null
 
-  // Persist current session to disk when the browser exits.
-  window.addEventListener('visibilitychange', function () {
-    if (document.visibilityState === 'hidden') {
-      if (activeSession) {
-        navigator.sendBeacon(URL, JSON.stringify(activeSession))
-      }
-    }
-  })
-
   return function sessionMiddleware (ctx, next) {
     return loadSession
       // Add session to request.
-      .then(function (session) { activeSession = ctx[opts.name] = session })
+      .then(function () { ctx[opts.name] = activeSession })
       // Run middleware.
       .then(next)
   }
 
   function getInitialSession () {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (resolve) {
       var script = doc.createElement('script')
       script.onload = function () {
-        resolve(new Receptacle(window[URL]))
+        resolve(activeSession = new Receptacle(window[URL]))
+        var lastSaved = activeSession.lastModified
         delete window[URL]
+
+        // Persist current session to disk when the browser exits.
+        window.addEventListener('visibilitychange', function () {
+          if (
+            document.visibilityState === 'hidden' &&
+            lastSaved !== (lastSaved = activeSession.lastModified)
+          ) {
+            navigator.sendBeacon(URL, new Blob(
+              [JSON.stringify(activeSession)],
+              { type: 'application/json' }
+            ))
+          }
+        })
       }
       script.async = true
-      script.src = URL
+      script.src = URL + '?' + Date.now().toString(32)
       head.appendChild(script)
       head.removeChild(script)
     })
