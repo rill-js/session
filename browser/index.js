@@ -20,6 +20,7 @@ module.exports = function (opts) {
   var URL = '/__' + encodeURIComponent(ID) + '__'
   var loadSession = getInitialSession()
   var activeSession = null
+  var lastSaved = 0
 
   return function sessionMiddleware (ctx, next) {
     return loadSession
@@ -27,6 +28,16 @@ module.exports = function (opts) {
       .then(function () { ctx[opts.name] = activeSession })
       // Run middleware.
       .then(next)
+      .then(saveSession)
+  }
+
+  function saveSession() {
+    if (lastSaved !== (lastSaved = activeSession.lastModified)) {
+      navigator.sendBeacon(URL, new Blob(
+        [JSON.stringify(activeSession)],
+        { type: 'application/json' }
+      ))
+    }
   }
 
   function getInitialSession () {
@@ -34,21 +45,8 @@ module.exports = function (opts) {
       var script = doc.createElement('script')
       script.onload = function () {
         resolve(activeSession = new Receptacle(window[URL]))
-        var lastSaved = activeSession.lastModified
+        lastSaved = activeSession.lastModified
         delete window[URL]
-
-        // Persist current session to disk when the browser exits.
-        window.addEventListener('visibilitychange', function () {
-          if (
-            document.visibilityState === 'hidden' &&
-            lastSaved !== (lastSaved = activeSession.lastModified)
-          ) {
-            navigator.sendBeacon(URL, new Blob(
-              [JSON.stringify(activeSession)],
-              { type: 'application/json' }
-            ))
-          }
-        })
       }
       script.async = true
       script.src = URL
