@@ -33,10 +33,10 @@ module.exports = function (opts) {
 
   function saveSession() {
     if (lastSaved !== (lastSaved = activeSession.lastModified)) {
-      navigator.sendBeacon(URL, new Blob(
-        [JSON.stringify(activeSession)],
-        { type: 'application/json' }
-      ))
+      var xhr = new window.XMLHttpRequest()
+      xhr.open('POST', URL)
+      xhr.setRequestHeader('content-type', 'application/json; charset=UTF-8')
+      xhr.send(JSON.stringify(activeSession))
     }
   }
 
