@@ -46,12 +46,11 @@ module.exports = function (opts) {
       script.onload = function () {
         resolve(activeSession = new Receptacle(window[URL]))
         lastSaved = activeSession.lastModified
+        head.removeChild(script)
         delete window[URL]
       }
-      script.async = true
       script.src = URL
       head.appendChild(script)
-      head.removeChild(script)
     })
   }
 }
